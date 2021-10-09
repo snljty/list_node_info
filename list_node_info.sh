@@ -19,7 +19,7 @@ echo "Threads per core: ${num_threads_per_core}"
 echo "Total cores: ${num_total_cores}"
 echo -n 'Is hyper-threading supported: '
 [[ ${num_threads_per_core} -eq 1 ]] && echo 'NO' || echo 'YES'
-which nvidia-smi 2> /dev/null && echo 'GPU:' && nvidia-smi -L | awk -F '(' '{print $1}'
+which nvidia-smi 2>& 1 1> /dev/null && echo 'GPU:' && nvidia-smi -L | awk -F '(' '{print $1}'
 [[ `whoami` != 'root' ]] && echo 'For other information, please run as root.' && exit
 echo 'Memory:'
 dmidecode -t memory 2> /dev/null | grep -E -A 12 'Memory\s+Device' | grep -E 'Size|Speed' | awk -F ':' '{print $2}' | sed -n 'N;s/\n/\t/p'
