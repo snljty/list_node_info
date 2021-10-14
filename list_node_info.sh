@@ -9,7 +9,7 @@ num_total_cores=$((${num_ways}*${num_cores_per_way}))
 num_total_threads=`cat /proc/cpuinfo | grep processor | wc -l | awk '{print int($1)}'`
 num_threads_per_core=$((${num_total_threads}/${num_total_cores}))
 
-echo "Node name: `hostname`"
+echo "Node name: `hostname -s`"
 echo 'Main Board:'
 dmidecode -t baseboard 2> /dev/null | grep -A 2 'Base Board Information' | tail -n 2 | sed 's/^\s*//'
 echo "CPU Name: ${cpu_name}"
@@ -24,7 +24,7 @@ which nvidia-smi 2>& 1 1> /dev/null && echo 'GPU:' && nvidia-smi -L | awk -F '('
 echo 'Memory:'
 dmidecode -t memory 2> /dev/null | grep -E -A 12 'Memory\s+Device' | grep -E 'Size|Speed' | awk -F ':' '{print $2}' | sed -n 'N;s/\n/\t/p'
 echo 'Disk:'
-fdisk -l 2> /dev/null | grep '^Disk /dev/' | sort -k 1,1
+fdisk -l 2> /dev/null | grep '^Disk /dev/' | grep -v /dev/mapper | sort -k 1,1
 # df -lhP | head -n 1
 # df -lhHP --total | tail -n 1
 echo
