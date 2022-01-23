@@ -24,7 +24,7 @@ which nvidia-smi 2>& 1 1> /dev/null && echo 'GPU:' && nvidia-smi -L | awk -F '('
 echo 'Memory:'
 dmidecode -t memory 2> /dev/null | grep -E -A 12 'Memory\s+Device' | grep -E 'Size|Speed' | awk -F ':' '{print $2}' | sed -n 'N;s/\n/\t/p'
 echo 'Disk:'
-fdisk -l 2> /dev/null | grep '^Disk /dev/' | grep -v /dev/mapper | sort -k 1,1
+fdisk -l 2> /dev/null | grep '^Disk /dev/' | grep -v /dev/mapper | grep -v /dev/loop | sort -k 1,1
 # df -lhP | head -n 1
 # df -lhHP --total | tail -n 1
 echo
