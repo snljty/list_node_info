@@ -30,7 +30,7 @@ paste -d '\t' \
     <(dmidecode -t memory 2> /dev/null | grep 'Speed:' | grep -v 'Configured' \
         | awk -F ':' '{print $2}' | sed 's/^\s*//' | awk '{printf "%-8s\n", $0}')
 echo 'Disk:'
-fdisk -l 2> /dev/null | grep '^Disk /dev/' | grep -v /dev/mapper | sort -k 1,1
+fdisk -l 2> /dev/null | grep '^Disk /dev/' | grep -v /dev/mapper | grep -v /dev/loop | sort -k 1,1
 # df -lhP | head -n 1
 # df -lhHP --total | tail -n 1
 echo
