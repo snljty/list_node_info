@@ -26,25 +26,26 @@ which nvidia-smi 1> /dev/null 2>& 1 && printf "\033[01;31m%s\033[0m:\n" 'GPU' &&
 printf "\033[01;31m%s\033[0m:\n" 'Memory'
 paste -d ' ' \
     <(dmidecode -t memory 2> /dev/null | grep 'Locator' | grep -v Bank | \
-        awk -F ':' '{print $2}' | sed 's/\s*//' | awk '{printf "%-12s\n", $0}') \
+        awk -F ':' '{print $2}' | sed 's/\s*//' | awk '{printf "%s\n", $0}') \
     <(dmidecode -t memory 2> /dev/null | grep 'Size:' | grep -v 'Volatile' | grep -v 'Cache' | \
         grep -v 'Logical' | awk -F ':' '{print $2}' | sed 's/^\s*//' | sed 's/No Module Installed/Empty/' | \
-	awk '{printf "%-8s\n", $0}') \
+	awk '{if ($2=="MB") {print $1/1024, "GB"} else if ($2=="") {print $1} else {print $1, "GB"}}' | \
+        awk '{printf "%-5s\n", $0}') \
     <(dmidecode -t memory 2> /dev/null | \
         grep -E 'Configured \S+ Speed:|No Module Installed' | grep -v "Unknown" | \
         awk -F ':' '{print $2}' | sed 's/^\s*//' | sed 's/No Module Installed//' | \
-        sed 's/unknown//' | awk '{printf "%-8s\n", $0}')
+        sed 's/unknown//' | sed 's!T/s!Hz!' | awk '{printf "%-8s\n", $0}')
 total_memory_size=`dmidecode -t memory 2> /dev/null | grep '^\s*Size:' | grep -v 'No' | awk -F ':' '{print $2}' | \
     awk 'BEGIN {sum=0} {sum+=$1} END {print sum}'`
 if [[ `dmidecode -t memory 2> /dev/null | grep 'Size:' | grep -E 'GB|MB' | \
     head -n 1 | awk '{print $NF}'` == 'MB' ]]
 then
-   total_memory_size=$((${total_memory_size}/1024))
+    total_memory_size=$((${total_memory_size}/1024))
 fi
 echo "Total memory size: ${total_memory_size} GB"
 printf "\033[01;31m%s\033[0m:\n" 'Disk'
-fdisk -l 2> /dev/null | grep '^Disk /dev/' | grep -v '/dev/mapper' | grep -v '/dev/ram/' | \
-    sort -k 1,1 | awk -F ',' '{print $1}' | sed 's/Disk //'
+fdisk -l 2> '/dev/null' | grep '^Disk /dev/' | grep -v '/dev/mapper' | sort -k 1,1 | awk -F ',' '{print $1}' | \
+    grep -v '/dev/ram' | sed 's/Disk //'
 # df -lhP | head -n 1
 # df -lhHP --total | tail -n 1
 echo
