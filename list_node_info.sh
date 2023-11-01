@@ -7,7 +7,7 @@
 # unset nocolor
 nocolor=1
 
-cpu_name=`lscpu | grep 'Model name:' | awk -F ':' '{print $2}' | sed 's/^\s*//'`
+cpu_name=`lscpu | grep 'Model name:' | awk -F ':' '{print $2}' | sed 's/^\s*//' | uniq`
 num_sockets=`lscpu | grep 'Socket(s):' | awk -F ':' '{print int($2)}'`
 num_cores_per_socket=`lscpu | grep 'Core(s) per socket:' | awk -F ':' '{print int($2)}'`
 num_total_cores=$((${num_sockets}*${num_cores_per_socket}))
