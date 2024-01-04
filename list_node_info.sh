@@ -4,15 +4,15 @@
 
 # set nocolor to anything to avoid printing using color by escape code
 
-# unset nocolor
-nocolor=1
+unset nocolor
+# nocolor=1
 
-cpu_name=`lscpu | grep 'Model name:' | awk -F ':' '{print $2}' | sed 's/^\s*//' | sed 's/\s*$//' | uniq`
-num_sockets=`lscpu | grep 'Socket(s):' | awk -F ':' '{print int($2)}'`
-num_cores_per_socket=`lscpu | grep 'Core(s) per socket:' | awk -F ':' '{print int($2)}'`
-num_total_cores=$((${num_sockets}*${num_cores_per_socket}))
-num_total_threads=`lscpu | grep '^CPU(s):' | awk -F ':' '{print int($2)}'`
-num_threads_per_core=$((${num_total_threads}/${num_total_cores}))
+cpu_name=`cat /proc/cpuinfo | grep 'model name' | sort | uniq | awk -F ':' '{print $2}' | sed 's/^\s*//' | sed 's/\s*$//'`
+num_sockets=`cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l | awk '{print int($0)}'`
+num_physical_cores_per_socket=`cat /proc/cpuinfo | grep 'core id' | sort | uniq | wc -l | awk '{print int($0)}'`
+num_physical_cores=$((${num_sockets}*${num_physical_cores_per_socket}))
+num_logical_cores=`grep 'core id' /proc/cpuinfo | sort | wc -l | awk '{print int($0)}'`
+num_logical_cores_per_socket=$((${num_logical_cores}/${num_sockets}))
 
 if [[ -z $nocolor ]]
 then
@@ -32,11 +32,25 @@ else
 fi
 echo "CPU Name: ${cpu_name}"
 echo "Sockets: ${num_sockets}"
-echo "Cores per socket: ${num_cores_per_socket}"
-echo "Threads per core: ${num_threads_per_core}"
-echo "Total cores: ${num_total_cores}"
+echo "Physical cores per socket: ${num_physical_cores_per_socket}"
+echo "Logical  cores per socket: ${num_logical_cores_per_socket}"
+echo "Total physical cores: ${num_physical_cores}"
+echo "Total  logical cores: ${num_logical_cores}"
 echo -n 'Is hyper-threading supported: '
-[[ ${num_threads_per_core} -eq 1 ]] && echo 'NO' || echo 'YES'
+if [[ ${num_physical_cores} -ne ${num_logical_cores} ]]
+then
+    echo 'YES'
+    num_performance_physical_cores=$((${num_logical_cores}-${num_physical_cores}))
+    num_efficient_cores=$((${num_physical_cores}-${num_performance_physical_cores}))
+    if [[ ${num_efficient_cores} -ne 0 ]]
+    then
+        echo "Total physical performance cores: ${num_performance_physical_cores}"
+        echo "Total efficient cores: ${num_efficient_cores}"
+    fi
+else
+    echo 'NO'
+fi
+
 if [[ -z $nocolor ]]
 then
     which nvidia-smi 1> /dev/null 2>& 1 && printf "\033[01;31m%s\033[0m:\n" 'GPU' && nvidia-smi -L | awk -F '(' '{print $1}'
