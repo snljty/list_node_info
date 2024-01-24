@@ -2,10 +2,7 @@
 
 # list basis information of main board, CPU, GPU, memory and disk on a node.
 
-# set nocolor to anything to avoid printing using color by escape code
-
-unset nocolor
-# nocolor=1
+# give anything to command arguments to avoid printing using color by escape code.
 
 cpu_name=`cat /proc/cpuinfo | grep 'model name' | sort | uniq | awk -F ':' '{print $2}' | sed 's/^\s*//' | sed 's/\s*$//'`
 num_sockets=`cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l | awk '{print int($0)}'`
@@ -14,12 +11,13 @@ num_physical_cores=$((${num_sockets}*${num_physical_cores_per_socket}))
 num_logical_cores=`grep 'core id' /proc/cpuinfo | sort | wc -l | awk '{print int($0)}'`
 num_logical_cores_per_socket=$((${num_logical_cores}/${num_sockets}))
 
-if [[ -z $nocolor ]]
+if [[ $# == 0 ]]
 then
+    unset nocolor
     printf "\033[01;31m%s\033[0m: %s\n" 'Node name' "`hostname -s`"
     printf "\033[01;31m%s\033[0m:\n" 'Main Board'
 else
-
+    nocolor=1
     printf "%s: %s\n" 'Node name' "`hostname -s`"
     printf "%s:\n" 'Main Board'
 fi
