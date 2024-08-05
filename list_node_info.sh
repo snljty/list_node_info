@@ -43,7 +43,7 @@ then
     if [[ ${num_efficient_cores} -ne 0 ]]
     then
         echo "Total physical performance cores: ${num_performance_physical_cores}"
-        echo "Total efficient cores: ${num_efficient_cores}"
+        echo "Total physical   efficient cores: ${num_efficient_cores}"
     fi
 else
     echo 'NO'
